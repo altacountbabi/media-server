@@ -9,6 +9,6 @@ in rustPlatform.buildRustPackage {
 
   src = lib.cleanSource ./.;
 
-  nativeBuildInputs = [ openssl pkg-config ];
-  buildInputs = [ openssl ];
+  nativeBuildInputs = [ openssl pkg-config rustPlatform.bindgenHook ];
+  buildInputs = [ openssl ffmpeg_7-headless ];
 }
