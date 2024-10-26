@@ -1,3 +1,11 @@
+# Nix build directory
+/result
+
+# Cargo build directory
 /target
+
+# Movie library to test with
 /movies
+
+# API Keys
 /config/keys.nix
