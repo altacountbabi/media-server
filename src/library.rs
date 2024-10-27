@@ -5,6 +5,12 @@ use tokio::{fs, io};
 use crate::movie::{self, Movie};
 
 #[derive(Debug, Deserialize, Serialize)]
+pub enum ContentType {
+    Movies,
+    Shows,
+}
+
+#[derive(Debug, Deserialize, Serialize)]
 pub struct Library {
     pub name: String,
     #[serde(rename = "type")]
@@ -32,10 +38,4 @@ impl Library {
 
         Ok(())
     }
-}
-
-#[derive(Debug, Deserialize, Serialize)]
-pub enum ContentType {
-    Movies,
-    Shows,
 }
