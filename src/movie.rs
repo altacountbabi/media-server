@@ -1,4 +1,8 @@
-use crate::utils::{filename, re};
+use crate::{
+    cache::Cache,
+    utils::{filename, re},
+};
+use log::trace;
 use serde::{Deserialize, Serialize};
 use std::path::PathBuf;
 
@@ -8,8 +12,15 @@ pub struct Movie {
     pub metadata: omdb::Movie,
 }
 
-pub async fn fetch_info(path: PathBuf, omdb_api_key: &str) -> Movie {
+pub async fn fetch_info(path: PathBuf, cache: &Cache, skip_cache: bool, omdb_api_key: &str) -> Movie {
     let name = &filename(&path);
+
+    if !skip_cache {
+        if let Ok(Some(cached_movie)) = cache.get_movie(name).await {
+            trace!("Found '{}' in cache", name);
+            return cached_movie;
+        }
+    }
 
     // Parse movie name
     let (title, release_year) = re(r"^(.*) \((\d{4})\)$")

@@ -1,5 +1,5 @@
 use crate::library::Library;
-use log::info;
+use log::trace;
 use serde::Deserialize;
 use std::{path::PathBuf, process::Command};
 
@@ -7,7 +7,7 @@ use std::{path::PathBuf, process::Command};
 #[allow(dead_code)]
 #[serde(rename_all = "camelCase")]
 pub struct Config {
-    pub dirs: Dirs,
+    pub data_dir: PathBuf,
     pub libraries: Vec<Library>,
     pub api_keys: ApiKeys,
 }
@@ -19,18 +19,10 @@ pub struct ApiKeys {
     pub omdb: String,
 }
 
-#[derive(Debug, Deserialize)]
-#[allow(dead_code)]
-#[serde(rename_all = "camelCase")]
-pub struct Dirs {
-    pub cache: PathBuf,
-    pub data: PathBuf,
-}
+pub fn eval_config(config_path: PathBuf) -> Result<Config, Box<dyn std::error::Error>> {
+    trace!("Evaluating configuration file");
 
-pub fn eval_config() -> Result<Config, Box<dyn std::error::Error>> {
-    info!("Evaluating configuration file");
-
-    let init = include_str!("init.nix").replace("\"$CONFIG\"", "./config");
+    let init = include_str!("init.nix").replace("\"$CONFIG\"", &config_path.canonicalize()?.to_string_lossy().to_string());
     let output = Command::new("nix-instantiate")
         .args(["--eval", "--strict", "--json", "--expr", &init])
         .output()?;

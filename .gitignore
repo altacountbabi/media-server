@@ -4,8 +4,9 @@
 # Cargo build directory
 /target
 
-# Movie library to test with
+# Movie library and data directory to test with
 /movies
+/data
 
 # API Keys
 /config/keys.nix

@@ -1,24 +1,42 @@
-use log::info;
+#![feature(path_file_prefix)]
+
+use cache::Cache;
+use clap::Parser;
+use log::{error, info, trace};
+use std::{path::PathBuf, process};
 use tokio::io;
 
+mod cache;
 mod config;
 mod library;
 mod movie;
 mod password;
 mod utils;
 
+#[derive(Debug, Parser)]
+struct Cli {
+    #[arg(short = 'd', long = "data", required = true)]
+    data_path: PathBuf,
+}
+
 #[tokio::main]
 async fn main() -> io::Result<()> {
     colog::init();
 
-    let mut config = config::eval_config().expect("Failed to evaluate config file");
+    let Cli { data_path } = Cli::parse();
 
-    dbg!(&config);
+    if !data_path.exists() {
+        error!("Data directory does not exist: {}", data_path.display());
+        process::exit(1);
+    }
+
+    let mut config = config::eval_config(data_path.join("config")).expect("Failed to evaluate config file");
+    let cache = Cache::new(&config.data_dir).await?;
 
     for library in &mut config.libraries {
         info!("Scanning library: {}", library.name);
-        library.scan(&config.api_keys.omdb).await?;
-        info!("Found movies:\n{:#?}", library.movies);
+        library.scan(&cache, false, &config.api_keys.omdb).await?;
+        trace!("Found movies:\n{:#?}", library.movies);
     }
 
     Ok(())
