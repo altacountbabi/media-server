@@ -6,7 +6,8 @@
 
 # Movie library and data directory to test with
 /movies
-/data
+data/*
 
-# API Keys
-/config/keys.nix
+# Config
+!data/config
+data/config/keys.nix
