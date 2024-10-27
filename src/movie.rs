@@ -12,7 +12,7 @@ pub async fn fetch_info(path: PathBuf, omdb_api_key: &str) -> Movie {
     let name = &filename(&path);
 
     // Parse movie name
-    let (title, release_year): (String, String) = re(r"^(.*) \((\d{4})\)$")
+    let (title, release_year) = re(r"^(.*) \((\d{4})\)$")
         .captures(name)
         .map(|caps| {
             (
