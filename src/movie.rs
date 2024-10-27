@@ -1,4 +1,4 @@
-use regex::Regex;
+use crate::utils::{filename, re};
 use serde::{Deserialize, Serialize};
 use std::path::PathBuf;
 
@@ -9,15 +9,10 @@ pub struct Movie {
 }
 
 pub async fn fetch_info(path: PathBuf, omdb_api_key: &str) -> Movie {
-    let name = path
-        .file_name()
-        .expect("Failed to get file name")
-        .to_str()
-        .expect("Failed to convert file name to string");
+    let name = &filename(&path);
 
     // Parse movie name
-    let re = Regex::new(r"^(.*) \((\d{4})\)$").unwrap();
-    let (title, release_year): (String, String) = re
+    let (title, release_year): (String, String) = re(r"^(.*) \((\d{4})\)$")
         .captures(name)
         .map(|caps| {
             (

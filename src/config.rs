@@ -1,6 +1,6 @@
 use log::info;
 use serde::Deserialize;
-use std::process::Command;
+use std::{path::PathBuf, process::Command};
 
 use crate::library::Library;
 
@@ -8,8 +8,9 @@ use crate::library::Library;
 #[allow(dead_code)]
 #[serde(rename_all = "camelCase")]
 pub struct Config {
-    pub api_keys: ApiKeys,
+    pub dirs: Dirs,
     pub libraries: Vec<Library>,
+    pub api_keys: ApiKeys,
 }
 
 #[derive(Debug, Deserialize)]
@@ -17,6 +18,14 @@ pub struct Config {
 #[serde(rename_all = "camelCase")]
 pub struct ApiKeys {
     pub omdb: String,
+}
+
+#[derive(Debug, Deserialize)]
+#[allow(dead_code)]
+#[serde(rename_all = "camelCase")]
+pub struct Dirs {
+    pub cache: PathBuf,
+    pub data: PathBuf,
 }
 
 pub fn eval_config() -> Result<Config, Box<dyn std::error::Error>> {

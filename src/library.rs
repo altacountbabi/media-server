@@ -12,7 +12,7 @@ pub struct Library {
     pub folders: Vec<PathBuf>,
 
     #[serde(skip)]
-    movies: Vec<Movie>,
+    pub movies: Vec<Movie>,
 }
 
 impl Library {
