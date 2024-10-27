@@ -1,8 +1,7 @@
+use crate::library::Library;
 use log::info;
 use serde::Deserialize;
 use std::{path::PathBuf, process::Command};
-
-use crate::library::Library;
 
 #[derive(Debug, Deserialize)]
 #[allow(dead_code)]

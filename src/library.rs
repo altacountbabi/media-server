@@ -1,8 +1,7 @@
+use crate::movie::{self, Movie};
 use serde::{Deserialize, Serialize};
 use std::path::PathBuf;
 use tokio::{fs, io};
-
-use crate::movie::{self, Movie};
 
 #[derive(Debug, Deserialize, Serialize)]
 pub enum ContentType {

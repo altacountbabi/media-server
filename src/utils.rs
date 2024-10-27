@@ -1,6 +1,5 @@
-use std::path::PathBuf;
-
 use regex::Regex;
+use std::path::PathBuf;
 
 pub fn re(regex: impl Into<String>) -> Regex {
     Regex::new(&regex.into()).unwrap()
