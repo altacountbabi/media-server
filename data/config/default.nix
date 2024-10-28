@@ -8,6 +8,4 @@
     type = name;
     folders = [ (lib.toLower name) ];
   }];
-
-  apiKeys = import ./keys.nix;
 }
