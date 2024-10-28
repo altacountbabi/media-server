@@ -1,9 +1,13 @@
 # Media Server
 
-Make sure to get an OMDb API key and set it inside of ./config/keys.nix similar to this:
+## Setup
+Make sure to get an TMDb API key and set it inside of /path/to/data/config/.env similar to this:
 
-```nix
-{ omdb = "your_key"; }
+```dotenv
+TMDB_KEY = "your-key"
 ```
 
-Also make sure to create a data directory for the cache and user database.
+## Credits
+This product uses the TMDB API but is not endorsed or certified by TMDB.
+<br>
+<img src="assets/tmdb-short.svg" width="70" height="40" />
