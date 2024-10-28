@@ -1,0 +1,9 @@
+[package]
+name = "tmdb"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+serde = { version = "1.0.213", features = ["derive"] }
+tokio = { version = "1.41.0", features = ["full"] }
+reqwest = "0.12.8"

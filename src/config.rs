@@ -1,7 +1,10 @@
 use crate::library::Library;
-use log::trace;
+use log::{error, trace};
 use serde::Deserialize;
-use std::{path::PathBuf, process::Command};
+use std::{
+    path::PathBuf,
+    process::{self, Command},
+};
 
 #[derive(Debug, Deserialize)]
 #[allow(dead_code)]
@@ -9,17 +12,17 @@ use std::{path::PathBuf, process::Command};
 pub struct Config {
     pub data_dir: PathBuf,
     pub libraries: Vec<Library>,
-    pub api_keys: ApiKeys,
-}
-
-#[derive(Debug, Deserialize)]
-#[allow(dead_code)]
-#[serde(rename_all = "camelCase")]
-pub struct ApiKeys {
-    pub omdb: String,
 }
 
 pub fn eval_config(config_path: PathBuf) -> Result<Config, Box<dyn std::error::Error>> {
+    trace!("Loading .env file");
+    if let Ok(_) = dotenv::from_path(config_path.join(".env")) {
+        trace!("Loaded .env file");
+    } else {
+        error!("Failed to load .env file");
+        process::exit(1);
+    }
+
     trace!("Evaluating configuration file");
 
     let init = include_str!("init.nix").replace("\"$CONFIG\"", &config_path.canonicalize()?.to_string_lossy().to_string());

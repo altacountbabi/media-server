@@ -15,6 +15,11 @@ mod utils;
 
 #[derive(Debug, Parser)]
 struct Cli {
+    #[cfg(debug_assertions)]
+    #[arg(short = 'd', long = "data", required = false, default_value = "data")]
+    data_path: PathBuf,
+
+    #[cfg(not(debug_assertions))]
     #[arg(short = 'd', long = "data", required = true)]
     data_path: PathBuf,
 }
@@ -35,7 +40,7 @@ async fn main() -> io::Result<()> {
 
     for library in &mut config.libraries {
         info!("Scanning library: {}", library.name);
-        library.scan(&cache, false, &config.api_keys.omdb).await?;
+        library.scan(&cache, false).await?;
         trace!("Found movies:\n{:#?}", library.movies);
     }
 

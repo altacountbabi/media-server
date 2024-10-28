@@ -5,14 +5,22 @@ use crate::{
 use log::trace;
 use serde::{Deserialize, Serialize};
 use std::path::PathBuf;
+use tmdb::TMDb;
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct Movie {
     pub path: PathBuf,
-    pub metadata: omdb::Movie,
+    // pub metadata: MovieMetadata,
 }
 
-pub async fn fetch_info(path: PathBuf, cache: &Cache, skip_cache: bool, omdb_api_key: &str) -> Movie {
+#[derive(Debug, Deserialize, Serialize)]
+pub struct MovieMetadata {
+    pub tmdb_id: u64,
+    pub title: String,
+    pub release_date: String,
+}
+
+pub async fn fetch_info(path: PathBuf, cache: &Cache, skip_cache: bool, tmdb_client: &TMDb) -> Movie {
     let name = &filename(&path);
 
     if !skip_cache {
@@ -23,23 +31,31 @@ pub async fn fetch_info(path: PathBuf, cache: &Cache, skip_cache: bool, omdb_api
     }
 
     // Parse movie name
-    let (title, release_year) = re(r"^(.*) \((\d{4})\)$")
+    let (title, year) = re(r"^(.*) \((\d{4})\)$")
         .captures(name)
         .map(|caps| {
             (
-                caps[1].trim().to_string(), // Capture the name
-                caps[2].to_string(),        // Capture the year
+                caps[1].trim().to_string(),                                        // Capture the name
+                caps[2].to_string().parse::<u64>().expect("Failed to parse year"), // Capture the year
             )
         })
         .expect("Failed to parse movie name");
 
     // Fetch movie metadata
-    let metadata = omdb::title(&title)
-        .apikey(omdb_api_key)
-        .year(&release_year)
-        .get()
-        .await
-        .expect("Failed to fetch movie data from OMDb");
+    // let tmdb_search = tmdb
+    //     .search()
+    //     .title(&title)
+    //     .year(year)
+    //     .execute()
+    //     .expect("Failed to fetch metadata from TMDb");
 
-    Movie { path, metadata }
+    // let tmdb_metadata = tmdb_search.results.first().expect("No movie found").to_owned();
+
+    // let metadata = MovieMetadata {
+    //     tmdb_id: tmdb_metadata.id,
+    //     title: tmdb_metadata.title.to_string(),
+    //     release_date: tmdb_metadata.release_date.to_string(),
+    // };
+
+    Movie { path }
 }
