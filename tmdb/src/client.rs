@@ -58,47 +58,6 @@ impl TMDb {
         }
     }
 
-    // let query: &str = &query.into();
-    //         let res = self
-    //             .get("search/movie", &[["query", query], ["include_adult", "false"]])
-    //             .await
-    //             .expect("Failed to make movie search request");
-
-    //         if res.status().is_success() {
-    //             let body = match res.text().await {
-    //                 Ok(body) => body,
-    //                 Err(e) => {
-    //                     error!("Failed to read response body: {}", e);
-    //                     return Err(e.into());
-    //                 }
-    //             };
-
-    //             let mut parsed: models::MovieSearchResults = match serde_json::from_str(&body) {
-    //                 Ok(parsed) => parsed,
-    //                 Err(e) => {
-    //                     error!("Failed to parse response body: {}", e);
-    //                     return Err(e.into());
-    //                 }
-    //             };
-
-    //             for searched_movie in &parsed.search_results {
-    //                 let movie_details = match self.movie_details(searched_movie.id).await {
-    //                     Ok(details) => details,
-    //                     Err(e) => {
-    //                         error!("Failed to fetch movie details: {:#?}", e);
-    //                         continue;
-    //                     }
-    //                 };
-
-    //                 parsed.results.push(movie_details);
-    //             }
-
-    //             return Ok(parsed);
-    //         } else {
-    //             error!("TMDb request failed: {}", res.status());
-    //             return Err(Error::HTTPStatusError(res.status()));
-    //         }
-
     pub fn search(&self, query: impl Into<String>) -> Search {
         Search::new(self.clone(), query.into())
     }
