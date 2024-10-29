@@ -1,8 +1,9 @@
 # Nix build directory
 /result
 
-# Cargo build directory
+# Cargo build directories
 /target
+/tmdb/target
 
 # Movie library and data directory to test with
 /movies
