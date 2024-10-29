@@ -14,11 +14,15 @@ pub fn filename(path: impl Into<PathBuf>) -> String {
         .to_string()
 }
 
-pub fn fileprefix(path: impl Into<PathBuf>) -> String {
+#[allow(dead_code)]
+pub fn file_ext(path: impl Into<PathBuf>) -> String {
     Into::<PathBuf>::into(path)
-        .file_prefix()
-        .expect("Failed to get file prefix")
+        .file_name()
+        .expect("Failed to get file name")
         .to_string_lossy()
+        .split('.')
+        .last()
+        .expect("Failed to get file extension")
         .to_string()
 }
 

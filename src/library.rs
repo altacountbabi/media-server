@@ -37,14 +37,17 @@ impl Library {
 
             while let Some(entry) = entries.next_entry().await? {
                 let path = entry.path();
-                let movie = match movie::fetch_info(path, &cache, self.skip_cache, &tmdb).await {
+                let (cached, mut movie) = match movie::fetch_info(path, &cache, self.skip_cache, &tmdb).await {
                     Ok(movie) => movie,
                     Err(e) => {
                         error!("Failed to fetch movie info: {:#?}", e);
                         continue;
                     }
                 };
-                cache.store_movie(&movie).await?;
+
+                if !cached {
+                    cache.store_movie(&mut movie).await?;
+                }
 
                 self.movies.push(movie);
             }

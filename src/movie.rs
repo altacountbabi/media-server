@@ -13,7 +13,7 @@ pub struct Movie {
     pub metadata: tmdb::models::Movie,
 }
 
-pub async fn fetch_info(path: PathBuf, cache: &Cache, skip_cache: bool, tmdb: &TMDb) -> Result<Movie, tmdb::Error> {
+pub async fn fetch_info(path: PathBuf, cache: &Cache, skip_cache: bool, tmdb: &TMDb) -> Result<(bool, Movie), tmdb::Error> {
     let name = &filename(&path);
 
     if skip_cache {
@@ -22,7 +22,7 @@ pub async fn fetch_info(path: PathBuf, cache: &Cache, skip_cache: bool, tmdb: &T
 
     if !skip_cache && let Ok(Some(cached_movie)) = cache.get_movie(name).await {
         debug!("Found '{}' in cache", name);
-        return Ok(cached_movie);
+        return Ok((true, cached_movie));
     }
 
     // Parse movie name
@@ -46,8 +46,11 @@ pub async fn fetch_info(path: PathBuf, cache: &Cache, skip_cache: bool, tmdb: &T
     };
     let tmdb_metadata = tmdb_search.results.remove(0);
 
-    Ok(Movie {
-        path,
-        metadata: tmdb_metadata,
-    })
+    Ok((
+        false,
+        Movie {
+            path,
+            metadata: tmdb_metadata,
+        },
+    ))
 }
