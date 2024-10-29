@@ -8,6 +8,6 @@
     type = name;
     folders = [ (lib.toLower name) ];
 
-    skipCache = true;
+    skipCache = false;
   }];
 }
