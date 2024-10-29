@@ -1,0 +1,6 @@
+data_dir = "/home/real/projects/media-server/data"
+
+[[library]]
+name = "Movies"
+type = "Movies"
+folders = ["movies"]
