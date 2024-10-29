@@ -2,7 +2,7 @@
 
 use cache::Cache;
 use clap::Parser;
-use log::{debug, error, info};
+use log::{debug, error, info, LevelFilter};
 use std::{path::PathBuf, process};
 use tokio::io;
 
@@ -26,7 +26,7 @@ struct Cli {
 
 #[tokio::main]
 async fn main() -> io::Result<()> {
-    colog::init();
+    colog::default_builder().filter_module("reqwest", LevelFilter::Warn).init();
 
     let Cli { data_path } = Cli::parse();
 
