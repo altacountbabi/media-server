@@ -62,10 +62,10 @@ impl Search {
                 parsed.results.push(movie_details);
             }
 
-            return Ok(parsed);
+            Ok(parsed)
         } else {
             error!("TMDb request failed: {}", res.status());
-            return Err(Error::HTTPStatusError(res.status()));
+            Err(Error::HTTPStatusError(res.status()))
         }
     }
 

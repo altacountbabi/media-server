@@ -13,20 +13,28 @@ impl TMDb {
         let mut url = format!("{BASE_URL}/{}", path.into());
         let query_string: String = params
             .iter()
-            .map(|[k, v]| format!("{}={}", k.to_string(), v.to_string()))
+            .map(|[k, v]| format!("{}={}", (*k), (*v)))
             .collect::<Vec<String>>()
             .join("&");
 
-        url = format!("{}?api_key={}&`language={}&{}", url, self.api_key, self.language, query_string);
+        url = format!("{}?api_key={}&language={}&{}", url, self.api_key, self.language, query_string);
 
         self.reqwest.get(url).send().await
     }
 
+    /// .
+    ///
+    /// # Errors
+    ///
+    /// This function will return an error if the request fails or if the response can't be read/parsed.
     pub async fn movie_details(&self, id: u64) -> Result<models::Movie, Error> {
-        let res = self
-            .get(format!("movie/{id}"), &[])
-            .await
-            .expect("Failed to make movie details request");
+        let res = match self.get(format!("movie/{id}"), &[]).await {
+            Ok(res) => res,
+            Err(err) => {
+                error!("Failed to get movie details: {}", err);
+                return Err(err.into());
+            }
+        };
 
         if res.status().is_success() {
             let body = match res.text().await {
@@ -51,10 +59,10 @@ impl TMDb {
                 production_company.logo_path = format!("{IMAGE_BASE_URL}{}", production_company.logo_path);
             }
 
-            return Ok(parsed);
+            Ok(parsed)
         } else {
             error!("TMDb request failed: {}", res.status());
-            return Err(Error::HTTPStatusError(res.status()));
+            Err(Error::HTTPStatusError(res.status()))
         }
     }
 

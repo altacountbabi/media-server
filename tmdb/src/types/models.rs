@@ -1,5 +1,5 @@
 use serde::{Deserialize, Serialize};
-use serde_default_utils::*;
+use serde_default_utils::{default_bool, default_u32, default_u64, serde_inline_default};
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct MovieSearchResults {
