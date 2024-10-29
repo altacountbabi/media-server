@@ -28,9 +28,9 @@ pub fn file_ext(path: impl Into<PathBuf>) -> String {
 
 pub async fn create_dir_if_not_exist(path: impl Into<PathBuf>) -> io::Result<()> {
     let path = path.into();
-    if !path.exists() {
-        create_dir_all(&path).await
-    } else {
+    if path.exists() {
         Ok(())
+    } else {
+        create_dir_all(&path).await
     }
 }

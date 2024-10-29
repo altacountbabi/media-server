@@ -12,7 +12,7 @@ pub struct Cache {
 
 impl Cache {
     pub async fn new(data_path: &Path) -> io::Result<Self> {
-        let cache_path = data_path.join("cache").to_path_buf();
+        let cache_path = data_path.join("cache");
         create_dir_if_not_exist(&cache_path).await?;
 
         Ok(Self { cache_path })
@@ -35,7 +35,6 @@ impl Cache {
             }
             Err(e) => {
                 error!("Failed to cache image '{url}' to '{}': {:#?}", path.display(), e);
-                return;
             }
         }
     }

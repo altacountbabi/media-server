@@ -1,7 +1,11 @@
 use crate::library::Library;
 use log::{debug, error};
 use serde::Deserialize;
-use std::{fs, path::PathBuf, process};
+use std::{
+    fs,
+    path::{Path, PathBuf},
+    process,
+};
 
 #[derive(Debug, Deserialize)]
 #[allow(dead_code)]
@@ -11,7 +15,7 @@ pub struct Config {
     pub libraries: Vec<Library>,
 }
 
-pub fn read_config(config_path: PathBuf) -> Config {
+pub fn read(config_path: &Path) -> Config {
     if let Err(err) = dotenv::from_path(config_path.join(".env")) {
         error!("Failed to load .env file: {err}");
         process::exit(1);

@@ -35,7 +35,7 @@ async fn main() -> io::Result<()> {
         process::exit(1);
     }
 
-    let mut config = config::read_config(data_path.join("config"));
+    let mut config = config::read(&data_path.join("config"));
     let cache = Cache::new(&config.data_dir).await?;
 
     for library in &mut config.libraries {
