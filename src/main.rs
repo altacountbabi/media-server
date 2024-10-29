@@ -26,7 +26,15 @@ struct Cli {
 
 #[tokio::main]
 async fn main() -> io::Result<()> {
-    colog::default_builder().filter_module("reqwest", LevelFilter::Warn).init();
+    let mut logger = colog::default_builder();
+
+    if cfg!(debug_assertions) {
+        logger.filter_level(LevelFilter::Trace);
+    } else {
+        logger.filter_level(LevelFilter::Info);
+    }
+
+    logger.filter_module("reqwest", LevelFilter::Warn).init();
 
     let Cli { data_path } = Cli::parse();
 
