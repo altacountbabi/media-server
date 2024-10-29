@@ -48,14 +48,16 @@ impl Cache {
         {
             trace!("Caching backdrop for '{}'", &movie.metadata.title);
             let path = path.join("backdrop").with_extension(IMAGE_FORMAT);
-            self.cache_image(&movie.metadata.backdrop_path, &path).await;
+            self.cache_image(&movie.metadata.backdrop_path.replace("original", "w500"), &path)
+                .await;
             movie.metadata.backdrop_path = path.to_string_lossy().to_string();
         }
 
         {
             trace!("Caching poster for '{}'", &movie.metadata.title);
             let path = path.join("poster").with_extension(IMAGE_FORMAT);
-            self.cache_image(&movie.metadata.poster_path, &path).await;
+            self.cache_image(&movie.metadata.poster_path.replace("original", "w500"), &path)
+                .await;
             movie.metadata.poster_path = path.to_string_lossy().to_string();
         }
 
@@ -70,14 +72,14 @@ impl Cache {
 
     pub async fn get_movie(&self, name: impl Into<String>) -> io::Result<Option<Movie>> {
         let name: String = name.into();
-        let path = self.cache_path.join("movies").join(name);
+        let path = self.cache_path.join("movies").join(name).join("metadata.bin");
 
         if !path.exists() {
             return Ok(None);
         }
 
         Ok(Some(
-            bincode::deserialize(&fs::read(path.join("metadata.bin")).await?).expect("Failed to deserialize movie from cache"),
+            bincode::deserialize(&fs::read(path).await?).expect("Failed to deserialize movie from cache"),
         ))
     }
 }
