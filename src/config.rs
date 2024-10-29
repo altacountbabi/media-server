@@ -1,5 +1,5 @@
 use crate::library::Library;
-use log::{error, trace};
+use log::{debug, error};
 use serde::Deserialize;
 use std::{
     path::PathBuf,
@@ -15,15 +15,12 @@ pub struct Config {
 }
 
 pub fn eval_config(config_path: PathBuf) -> Result<Config, Box<dyn std::error::Error>> {
-    trace!("Loading .env file");
-    if let Ok(_) = dotenv::from_path(config_path.join(".env")) {
-        trace!("Loaded .env file");
-    } else {
+    if let Err(_) = dotenv::from_path(config_path.join(".env")) {
         error!("Failed to load .env file");
         process::exit(1);
     }
 
-    trace!("Evaluating configuration file");
+    debug!("Evaluating configuration file");
 
     let init = include_str!("init.nix").replace("\"$CONFIG\"", &config_path.canonicalize()?.to_string_lossy().to_string());
     let output = Command::new("nix-instantiate")

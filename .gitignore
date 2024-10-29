@@ -11,3 +11,6 @@ data/*
 # Config
 !data/config
 data/config/.env
+
+# Directory for testing
+/ignore

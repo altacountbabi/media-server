@@ -2,32 +2,27 @@ use crate::{
     cache::Cache,
     utils::{filename, re},
 };
-use log::trace;
+use log::{debug, error};
 use serde::{Deserialize, Serialize};
 use std::path::PathBuf;
-use tmdb::TMDb;
+use tmdb::{models, TMDb};
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct Movie {
     pub path: PathBuf,
-    // pub metadata: MovieMetadata,
+    pub metadata: tmdb::models::Movie,
 }
 
-#[derive(Debug, Deserialize, Serialize)]
-pub struct MovieMetadata {
-    pub tmdb_id: u64,
-    pub title: String,
-    pub release_date: String,
-}
-
-pub async fn fetch_info(path: PathBuf, cache: &Cache, skip_cache: bool, tmdb_client: &TMDb) -> Movie {
+pub async fn fetch_info(path: PathBuf, cache: &Cache, skip_cache: bool, tmdb: &TMDb) -> Result<Movie, tmdb::Error> {
     let name = &filename(&path);
 
-    if !skip_cache {
-        if let Ok(Some(cached_movie)) = cache.get_movie(name).await {
-            trace!("Found '{}' in cache", name);
-            return cached_movie;
-        }
+    if skip_cache {
+        debug!("Skipping cache");
+    }
+
+    if !skip_cache && let Ok(Some(cached_movie)) = cache.get_movie(name).await {
+        debug!("Found '{}' in cache", name);
+        return Ok(cached_movie);
     }
 
     // Parse movie name
@@ -35,27 +30,24 @@ pub async fn fetch_info(path: PathBuf, cache: &Cache, skip_cache: bool, tmdb_cli
         .captures(name)
         .map(|caps| {
             (
-                caps[1].trim().to_string(),                                        // Capture the name
-                caps[2].to_string().parse::<u64>().expect("Failed to parse year"), // Capture the year
+                caps[1].trim().to_string(), // Capture the name
+                caps[2].to_string(),        // Capture the year
             )
         })
         .expect("Failed to parse movie name");
 
     // Fetch movie metadata
-    // let tmdb_search = tmdb
-    //     .search()
-    //     .title(&title)
-    //     .year(year)
-    //     .execute()
-    //     .expect("Failed to fetch metadata from TMDb");
+    let mut tmdb_search: models::MovieSearchResults = match tmdb.search(&title).year(year).execute().await {
+        Ok(search) => search,
+        Err(e) => {
+            error!("Failed to fetch metadata from for movie '{title}' from TMDb: {:#?}", e);
+            return Err(e);
+        }
+    };
+    let tmdb_metadata = tmdb_search.results.remove(0);
 
-    // let tmdb_metadata = tmdb_search.results.first().expect("No movie found").to_owned();
-
-    // let metadata = MovieMetadata {
-    //     tmdb_id: tmdb_metadata.id,
-    //     title: tmdb_metadata.title.to_string(),
-    //     release_date: tmdb_metadata.release_date.to_string(),
-    // };
-
-    Movie { path }
+    Ok(Movie {
+        path,
+        metadata: tmdb_metadata,
+    })
 }

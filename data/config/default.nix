@@ -7,5 +7,7 @@
     name = "Movies";
     type = name;
     folders = [ (lib.toLower name) ];
+
+    skipCache = true;
   }];
 }

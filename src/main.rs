@@ -1,8 +1,8 @@
-#![feature(path_file_prefix)]
+#![feature(path_file_prefix, let_chains)]
 
 use cache::Cache;
 use clap::Parser;
-use log::{error, info, trace};
+use log::{debug, error, info};
 use std::{path::PathBuf, process};
 use tokio::io;
 
@@ -40,8 +40,8 @@ async fn main() -> io::Result<()> {
 
     for library in &mut config.libraries {
         info!("Scanning library: {}", library.name);
-        library.scan(&cache, false).await?;
-        trace!("Found movies:\n{:#?}", library.movies);
+        library.scan(&cache).await?;
+        debug!("Found movies:\n{:#?}", library.movies);
     }
 
     Ok(())
