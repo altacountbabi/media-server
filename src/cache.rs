@@ -59,22 +59,6 @@ impl Cache {
             movie.metadata.poster_path = path.to_string_lossy().to_string();
         }
 
-        for production_company in &mut movie.metadata.production_companies {
-            trace!(
-                "Caching production company '{}' logo for '{}'",
-                production_company.name,
-                &movie.metadata.title
-            );
-
-            let path = path.join(format!(
-                "{}-{}-logo.{}",
-                production_company.id, production_company.name, IMAGE_FORMAT
-            ));
-            self.cache_image(&production_company.logo_path, &path).await;
-
-            production_company.logo_path = path.to_string_lossy().to_string();
-        }
-
         fs::write(
             path.join("metadata.bin"),
             bincode::serialize(&movie).expect("Failed to serialize movie"),
