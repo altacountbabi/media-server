@@ -31,7 +31,7 @@ impl TMDb {
         let res = match self.get(format!("movie/{id}"), &[]).await {
             Ok(res) => res,
             Err(err) => {
-                error!("Failed to get movie details: {}", err);
+                error!("Failed to get movie details: {err}");
                 return Err(err.into());
             }
         };

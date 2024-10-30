@@ -4,7 +4,7 @@ use crate::{
 };
 use log::error;
 use serde::{Deserialize, Serialize};
-use std::path::PathBuf;
+use std::{path::PathBuf, process};
 use tmdb::TMDb;
 use tokio::{fs, io};
 
@@ -30,7 +30,15 @@ pub struct Library {
 
 impl Library {
     pub async fn scan(&mut self, cache: &Cache) -> io::Result<()> {
-        let tmdb = TMDb::new(dotenv::var("TMDB_KEY").expect("Failed to get TMDb API key"));
+        let tmdb_api_key = match dotenv::var("TMDB_KEY") {
+            Ok(key) => key,
+            Err(err) => {
+                error!("Failed to get TMDb API key: {err}");
+                process::exit(1);
+            }
+        };
+
+        let tmdb = TMDb::new(tmdb_api_key);
 
         for folder in &self.folders {
             let mut entries = fs::read_dir(folder).await?;

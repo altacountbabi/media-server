@@ -27,11 +27,17 @@ impl Search {
     }
 
     pub async fn execute(&self) -> Result<models::MovieSearchResults, Error> {
-        let res = self
+        let res = match self
             .tmdb
             .get("search/movie", &[["query", &self.query], ["include_adult", "false"]])
             .await
-            .expect("Failed to make movie search request");
+        {
+            Ok(res) => res,
+            Err(err) => {
+                error!("Failed to make movie search request: {err}");
+                return Err(err.into());
+            }
+        };
 
         if res.status().is_success() {
             let body = match res.text().await {

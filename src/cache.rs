@@ -22,20 +22,32 @@ impl Cache {
         let url: String = url.into();
         let path: PathBuf = path.into();
 
-        match reqwest::get(&url).await {
-            Ok(response) => {
-                let bytes = response.bytes().await.expect("Failed to read response");
-                let image = image::load_from_memory(&bytes).expect("Failed to load image");
-                match image.save_with_format(&path, ImageFormat::from_extension(IMAGE_FORMAT).unwrap_or(ImageFormat::Png)) {
-                    Ok(()) => (),
-                    Err(e) => {
-                        error!("Failed to write image to '{}': {:#?}", path.display(), e);
-                    }
-                }
+        let response = match reqwest::get(&url).await {
+            Ok(response) => response,
+            Err(err) => {
+                error!("Failed to cache image '{url}' to '{}': {err}", path.display());
+                return;
             }
-            Err(e) => {
-                error!("Failed to cache image '{url}' to '{}': {:#?}", path.display(), e);
+        };
+
+        let bytes = match response.bytes().await {
+            Ok(bytes) => bytes,
+            Err(err) => {
+                error!("Failed to read response body when caching image '{url}':\n{err}");
+                return;
             }
+        };
+
+        let image = match image::load_from_memory(&bytes) {
+            Ok(image) => image,
+            Err(err) => {
+                error!("Failed to decode image '{url}':\n{err}");
+                return;
+            }
+        };
+
+        if let Err(err) = image.save_with_format(&path, ImageFormat::from_extension(IMAGE_FORMAT).unwrap_or(ImageFormat::Png)) {
+            error!("Failed to write image to '{}': {err}", path.display());
         }
     }
 
@@ -60,13 +72,15 @@ impl Cache {
             movie.metadata.poster_path = path.to_string_lossy().to_string();
         }
 
-        fs::write(
-            path.join("metadata.bin"),
-            bincode::serialize(&movie).expect("Failed to serialize movie"),
-        )
-        .await?;
+        let serialized = match bincode::serialize(&movie) {
+            Ok(serialized) => serialized,
+            Err(err) => {
+                error!("Failed to serialize movie: {err}");
+                return Err(io::ErrorKind::Other.into());
+            }
+        };
 
-        Ok(())
+        fs::write(path.join("metadata.bin"), serialized).await
     }
 
     pub async fn get_movie(&self, name: impl Into<String>) -> io::Result<Option<Movie>> {
@@ -77,8 +91,21 @@ impl Cache {
             return Ok(None);
         }
 
-        Ok(Some(
-            bincode::deserialize(&fs::read(path).await?).expect("Failed to deserialize movie from cache"),
-        ))
+        let bytes = match fs::read(&path).await {
+            Ok(bytes) => bytes,
+            Err(err) => {
+                error!("Failed to read movie metadata from cache: {err}");
+                return Ok(None);
+            }
+        };
+        let deserialized: Movie = match bincode::deserialize(&bytes) {
+            Ok(movie) => movie,
+            Err(err) => {
+                error!("Failed to deserialize movie metadata from cache: {err}");
+                return Ok(None);
+            }
+        };
+
+        Ok(Some(deserialized))
     }
 }
