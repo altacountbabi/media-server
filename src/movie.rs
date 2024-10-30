@@ -27,7 +27,7 @@ pub async fn fetch_info(path: PathBuf, cache: &Cache, skip_cache: bool, tmdb: &T
     }
 
     if !skip_cache && let Ok(Some(cached_movie)) = cache.get_movie(&name).await {
-        debug!("Found '{}' in cache", &name);
+        debug!("Found '{name}' in cache");
         return Ok((true, cached_movie));
     }
 
@@ -45,9 +45,9 @@ pub async fn fetch_info(path: PathBuf, cache: &Cache, skip_cache: bool, tmdb: &T
     // Fetch movie metadata
     let mut tmdb_search: models::MovieSearchResults = match tmdb.search(&title).year(year).execute().await {
         Ok(search) => search,
-        Err(e) => {
-            error!("Failed to fetch metadata from for movie '{title}' from TMDb: {:#?}", e);
-            return Err(e);
+        Err(err) => {
+            error!("Failed to fetch metadata from for movie '{title}' from TMDb: {:#?}", err);
+            return Err(err);
         }
     };
 

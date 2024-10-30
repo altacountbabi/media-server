@@ -42,25 +42,25 @@ impl Search {
         if res.status().is_success() {
             let body = match res.text().await {
                 Ok(body) => body,
-                Err(e) => {
-                    error!("Failed to read response body: {}", e);
-                    return Err(e.into());
+                Err(err) => {
+                    error!("Failed to read response body: {err}");
+                    return Err(err.into());
                 }
             };
 
             let mut parsed: models::MovieSearchResults = match serde_json::from_str(&body) {
                 Ok(parsed) => parsed,
-                Err(e) => {
-                    error!("Failed to parse response body: {}", e);
-                    return Err(e.into());
+                Err(err) => {
+                    error!("Failed to parse response body: {err}");
+                    return Err(err.into());
                 }
             };
 
             for searched_movie in &parsed.search_results {
                 let movie_details = match self.tmdb.movie_details(searched_movie.id).await {
                     Ok(details) => details,
-                    Err(e) => {
-                        error!("Failed to fetch movie details: {:#?}", e);
+                    Err(err) => {
+                        error!("Failed to fetch movie details: {err}");
                         continue;
                     }
                 };

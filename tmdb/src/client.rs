@@ -10,14 +10,15 @@ const IMAGE_BASE_URL: &str = "https://image.tmdb.org/t/p/original";
 
 impl TMDb {
     pub(crate) async fn get(&self, path: impl Into<String>, params: &[[&str; 2]]) -> reqwest::Result<reqwest::Response> {
-        let mut url = format!("{BASE_URL}/{}", path.into());
-        let query_string: String = params
+        let path: String = path.into();
+        let mut url = format!("{BASE_URL}/{path}");
+        let args: String = params
             .iter()
             .map(|[k, v]| format!("{}={}", (*k), (*v)))
             .collect::<Vec<String>>()
             .join("&");
 
-        url = format!("{}?api_key={}&language={}&{}", url, self.api_key, self.language, query_string);
+        url = format!("{url}?api_key={}&language={}&{args}", self.api_key, self.language);
 
         self.reqwest.get(url).send().await
     }
@@ -39,17 +40,17 @@ impl TMDb {
         if res.status().is_success() {
             let body = match res.text().await {
                 Ok(body) => body,
-                Err(e) => {
-                    error!("Failed to read response body: {}", e);
-                    return Err(e.into());
+                Err(err) => {
+                    error!("Failed to read response body: {err}");
+                    return Err(err.into());
                 }
             };
 
             let mut parsed: models::Movie = match serde_json::from_str(&body) {
                 Ok(parsed) => parsed,
-                Err(e) => {
-                    error!("Failed to parse response body: {}", e);
-                    return Err(e.into());
+                Err(err) => {
+                    error!("Failed to parse response body: {err}");
+                    return Err(err.into());
                 }
             };
 

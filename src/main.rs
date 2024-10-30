@@ -36,7 +36,13 @@ async fn main() -> io::Result<()> {
     }
 
     let mut config = config::read(&data_path.join("config"));
-    let cache = Cache::new(&config.data_dir).await?;
+    let cache = match Cache::new(&config.data_dir).await {
+        Ok(cache) => cache,
+        Err(err) => {
+            error!("Failed to initialize cache: {err}");
+            process::exit(1);
+        }
+    };
 
     for library in &mut config.libraries {
         info!("Scanning library: {}", library.name);
